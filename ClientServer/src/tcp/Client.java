@@ -9,9 +9,8 @@ import java.util.Scanner;
 
 public class Client {
 
-	String servhost;
-	int portserveur;
-	static  int DEFAULT_PORT_TCP = 1027;
+	static String servhost;
+	static  int port = 1027;
 
 	public static void main(String[] args){
 
@@ -19,12 +18,7 @@ public class Client {
 
 		try {
 			servhost = args[0];
-		} catch (Exception ex) {
-
-		}
-
-		try {
-			DEFAULT_PORT_TCP = Integer.parseInt(args[1]);
+			port = Integer.parseInt(args[1]);
 		} catch (Exception ex) {
 
 		}
@@ -36,7 +30,7 @@ public class Client {
 
 		while (true) {
 			try {
-				Socket sock = new Socket(servhost, DEFAULT_PORT_TCP);
+				Socket sock = new Socket(servhost, port);
 				BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 				PrintWriter out = new PrintWriter(new OutputStreamWriter(sock.getOutputStream()));
 
