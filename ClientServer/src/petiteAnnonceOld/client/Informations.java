@@ -3,22 +3,8 @@ package petiteAnnonce.client;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
-import petiteAnnonce.server.UserThread;
 
-class Message{
-	
-	protected String intitule;
-	protected String idMsg;
-	protected String _src;
-	protected String _dest;
-	
-	public Message(String id, String corps, String src, String dest) {
-		idMsg = id;
-		intitule = corps;
-		_src = src;
-		_dest = dest;
-	}
-}
+import petiteAnnonce.server.UserThread;
 
 public class Informations {
 
@@ -27,7 +13,6 @@ public class Informations {
 	protected Set<Annonce> an;
 	private int nUsers;
 	public Scanner input;
-	public HashSet<Message> msg;
 
 	public Set<User> getUsers() {
 		return users;
@@ -114,20 +99,18 @@ public class Informations {
 	public boolean hasUser(String userName) {
 		boolean exist = false;
 		for (User user : users) {
-			if (user.username == userName)
+			if (user.getUserName() == userName)
 				exist = true;
 		}
 		return exist;
 	}
 
-	
 	public Informations() {
 		users = new HashSet<>();
 		userThreads = new HashSet<>();
 		an = new HashSet<>();
 		nUsers = 0;
 		input = new Scanner(System.in);
-		msg = new HashSet<>();
 	}
 
 }

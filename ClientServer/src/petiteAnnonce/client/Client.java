@@ -3,7 +3,6 @@ package petiteAnnonce.client;
 import java.net.*;
 import java.util.Scanner;
 
-import annonce.Informations;
 
 import java.io.*;
  
@@ -35,9 +34,6 @@ public class Client {
             System.out.println("------------- client starting!!!--------------- ");
  
             	new AnnonceThread(socket, userName).start();
-                //new ReadThread(socket, this).start();
-                //new WriteThread(socket, this).start();
-         
             
  
         } catch (UnknownHostException ex) {

@@ -2,6 +2,8 @@ package petiteAnnonce.server;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
+
 import petiteAnnonce.client.*;
 
 public class Server {
@@ -12,7 +14,7 @@ public class Server {
 	ServerSocket serverSocket;
 
 	public Server(int port) {
-		Server.port = port;
+		this.port = port;
 		info = new Informations();
 	}
 
@@ -25,7 +27,7 @@ public class Server {
 				Socket socket = serverSocket.accept();
 				System.out.println("New user connected");
 
-				UserThread newUser = new UserThread(socket, this);
+				UserThread newUser = new UserThread(socket, info);
 				info.getUserThreads().add(newUser);
 				newUser.start();
 			}
@@ -47,34 +49,5 @@ public class Server {
 		server.execute();
 	}
 
-	/**
-	 * Delivers a reply to user who asked
-	 */
-	void accuse_Reception(String message, UserThread excludeUser) {
-		for (UserThread aUser : info.getUserThreads()) {
-			if (aUser == excludeUser) {
-				aUser.sendMessage(message);
-			}
-		}
-	}
-
-	/**
-	 * Stores the newly connected client.
-	 */
-
-	public static void add_User(String username, Socket clt) throws IOException {
-		info.setnUsers(info.getnUsers() + 1);
-		String idUser = "User00" + info.getUsers();
-		User user = new User(idUser, username, clt.getPort());
-
-		info.addUser(user);
-	}
 	
-	String getUserId(String userName) {
-    	for(User user: info.getUsers()) {
-    		if (info.hasUser(userName))
-        		return user.getId_User();
-    	}
-		return null;
-    }
 }

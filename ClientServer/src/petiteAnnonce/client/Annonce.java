@@ -31,13 +31,13 @@ public class Annonce {
 	/**
 	 * @return the _titre
 	 */
-	public String get_titre() {
+	public String getTitre() {
 		return _titre;
 	}
 	/**
 	 * @param _titre the _titre to set
 	 */
-	public void set_titre(String _titre) {
+	public void setTitre(String _titre) {
 		this._titre = _titre;
 	}
 	public String getDomaine() {
@@ -68,7 +68,7 @@ public class Annonce {
 	
 	public String toString() {
 		
-		return "||"+getId_Annonce()+" | "+getPrix()+"$ | "+getDomaine()+" | "+getDescriptif()+" ||\n";
+		return "||"+getId_Annonce()+" \t||\t "+getTitre()+" \t||\t "+getDomaine()+" \t||\t "+getPrix()+"$ \t|| "+getDescriptif()+" \t||"+getIdUser()+"\n";
 	}
 	
 	String _id_Annonce;
