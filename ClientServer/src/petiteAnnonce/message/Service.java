@@ -16,43 +16,51 @@ public class Service extends Thread{
 	private  BufferedReader reader;
 
 	final Scanner sc = new Scanner(System.in);
-	
+
 	public  Service(Socket clt){
 
 		this.socket = clt;
-		
+
 		OutputStream output;
 		try {
 			output = socket.getOutputStream();
-		
-		writer = new PrintWriter(output, true);
-		InputStream input = socket.getInputStream();
-		reader = new BufferedReader(new InputStreamReader(input));
+
+			writer = new PrintWriter(output, true);
+			InputStream input = socket.getInputStream();
+			reader = new BufferedReader(new InputStreamReader(input));
 
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	}
-	
+
 	public void run() {
-	try {
-		while (true) {
-			String message;
+		try {
+			
+			writer.println("Bienvenue");
+			writer.flush();
+			
+			while (true) {
+				
+				String message = reader.readLine();
+				System.out.println("\n[ Client ]: "+message);
+				System.out.print("\nMoi:");
 				message = sc.nextLine();
+				
 				writer.println(message);
-						message = reader.readLine();
-							System.out.println("[ Client ]: "+message);
-							//message = reader.readLine();
-						
+				writer.flush();
+				
+				
+
+			}
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		//writer.close();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-		
+
+
 
 	}
 
