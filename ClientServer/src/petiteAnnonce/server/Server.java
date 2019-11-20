@@ -25,7 +25,7 @@ public class Server {
 
 			while (true) {
 				Socket socket = serverSocket.accept();
-				System.out.println("New user connected");
+				System.out.println("What's your name?? ");
 
 				UserThread newUser = new UserThread(socket, info);
 				info.getUserThreads().add(newUser);

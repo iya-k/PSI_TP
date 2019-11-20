@@ -81,7 +81,7 @@ public class AnnonceThread extends Thread {
 						//System.out.println(response);
 						break;
 					case 'b':
-						//System.out.println("\n'''''''''''''''' All Announces");
+						System.out.println("\n'''''''''''''''' All Announces");
 
 						clef = "all-Ann"+limit;
 						writer.println(clef);
@@ -90,7 +90,7 @@ public class AnnonceThread extends Thread {
 						response = reader.readLine();
 						if(response == null || response == "") {
 							
-							response = "You don't have any announce";
+							response = "Not yet any announce";
 							break;
 						}
 						System.out.println("\n'''''''''''''''' My Announces \n");
@@ -104,7 +104,7 @@ public class AnnonceThread extends Thread {
 						response = reader.readLine();
 						
 						if(response == null || response == "") {
-							response = "Not yet any announce";
+							response = "You don't have any announce";
 							break;
 						}
 
