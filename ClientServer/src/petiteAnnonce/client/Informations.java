@@ -26,8 +26,8 @@ public class Informations {
 	private Set<UserThread> userThreads;
 	protected Set<Annonce> an;
 	private int nUsers;
-	public Scanner input;
-	public HashSet<Message> msg;
+	//public Scanner input;
+	public Set<Message> msg;
 
 	public Set<User> getUsers() {
 		return users;
@@ -126,7 +126,7 @@ public class Informations {
 		userThreads = new HashSet<>();
 		an = new HashSet<>();
 		nUsers = 0;
-		input = new Scanner(System.in);
+		//input = new Scanner(System.in);
 		msg = new HashSet<>();
 	}
 
