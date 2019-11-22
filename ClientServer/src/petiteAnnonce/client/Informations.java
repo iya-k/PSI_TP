@@ -1,7 +1,6 @@
 package petiteAnnonce.client;
 
 import java.util.HashSet;
-import java.util.Scanner;
 import java.util.Set;
 import petiteAnnonce.server.UserThread;
 
@@ -25,7 +24,7 @@ public class Informations {
 	private Set<User> users;
 	private Set<UserThread> userThreads;
 	protected Set<Annonce> an;
-	private int nUsers;
+	private int nAnnonce;
 	//public Scanner input;
 	public Set<Message> msg;
 
@@ -64,17 +63,17 @@ public class Informations {
 	}
 
 	/**
-	 * @return the nUsers
+	 * @return the nAnnonce
 	 */
-	public int getnUsers() {
-		return nUsers;
+	public int getnAnnonce() {
+		return nAnnonce;
 	}
 
 	/**
-	 * @param nUsers the nUsers to set
+	 * @param nAnnonce the nAnnonce to set
 	 */
-	public void setnUsers(int nUsers) {
-		this.nUsers = nUsers;
+	public void setnAnnonce(int nAnnonce) {
+		this.nAnnonce = nAnnonce;
 	}
 
 	/**
@@ -92,20 +91,9 @@ public class Informations {
 		boolean removed = users.remove(u);
 		if (removed) {
 			userThreads.remove(aUser);
-			System.out.println("The user " + u + " quitted");
+			System.out.println("Bye bye " + u.getUserName());
 		}
 	}
-
-	/**
-	 * Delivers a announce from one user to others (broadcasting)
-	 *//*
-		 * void broadcast(Annonce a, UserThread excludeUser) { System.out.
-		 * println("===================== Liste des annonces ========================");
-		 * for (UserThread aUser : userThreads) { if (aUser == excludeUser) {
-		 * System.out.println(a.toString()); } }
-		 * 
-		 * }
-		 */
 
 	/**
 	 * Returns true if there are other users connected (not count the currently
@@ -125,8 +113,7 @@ public class Informations {
 		users = new HashSet<>();
 		userThreads = new HashSet<>();
 		an = new HashSet<>();
-		nUsers = 0;
-		//input = new Scanner(System.in);
+		nAnnonce = 0;
 		msg = new HashSet<>();
 	}
 

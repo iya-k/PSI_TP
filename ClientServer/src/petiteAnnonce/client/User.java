@@ -7,26 +7,26 @@ package petiteAnnonce.client;
 public class User {
 	
 	
-	protected String id_User;
+	protected String adress_ip;
 	protected String username;
 	protected int port;
 
 	/**
-	 * @param id_User
+	 * @param adresse_ip
 	 * @param username
 	 * @param port
 	 */
-	public User(String id_User, String username, int port) {
-		this.id_User = id_User;
+	public User(String username, String adresse, int port) {
+		this.adress_ip = adresse;
 		this.username = username;
 		this.port = port;
 	}
 	
-	public String getId_User() {
-		return id_User;
+	public String getAdresseIp() {
+		return adress_ip;
 	}
-	public void setId_User(String id_User) {
-		this.id_User = id_User;
+	public void setAdresseIp(String adresse) {
+		this.adress_ip = adresse;
 	}
 
 	public int getPort() {

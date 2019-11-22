@@ -21,11 +21,11 @@ public class Server {
 	public void execute() {
 		try (ServerSocket serverSocket = new ServerSocket(port)) {
 
-			System.out.println("--------------- Server is listening on port " + PORT_TCP + " --------------\n");
+			System.out.println("--------------- Server is listening on port " + PORT_TCP + " --------------");
 
 			while (true) {
 				Socket socket = serverSocket.accept();
-				System.out.println("What's your name?? ");
+				System.out.println("\nWhat's your name?? "+socket.getPort()+"\n");
 
 				UserThread newUser = new UserThread(socket, info);
 				info.getUserThreads().add(newUser);

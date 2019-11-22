@@ -14,13 +14,13 @@ public class Annonce {
 	 * @param descriptif
 	 * @param user
 	 */
-	public Annonce(String id, String titre, String domaine, String prix, String desc, String idUser) {
+	public Annonce(String id, String titre, String domaine, String prix, String desc, String user) {
 		_id_Annonce = id;
 		_titre = titre;
 		_domaine = domaine;
 		_prix = prix;
 		_descriptif = desc;
-		_idUser = idUser;
+		_user = user;
 	}
 	public String getId_Annonce() {
 		return _id_Annonce;
@@ -59,16 +59,16 @@ public class Annonce {
 		_descriptif = descriptif;
 	}
 	
-	public String getIdUser() {
-		return _idUser;
+	public String getUser() {
+		return _user;
 	}
-	public void setIdUser(String idUser) {
-		_idUser = idUser;
+	public void setUser(String user) {
+		_user = user;
 	}
 	
 	public String toString() {
 		
-		return "||"+getId_Annonce()+" -------- "+getTitre()+" ------- "+getDomaine()+" ------- "+getPrix()+"$ --------- "+getDescriptif()+" ---------"+getIdUser()+"!!";
+		return "||"+getId_Annonce()+" -------- "+getTitre()+" ------- "+getDomaine()+" ------- "+getPrix()+"$ --------- "+getDescriptif()+" ---------"+getUser()+"|| !!";
 	}
 	
 	String _id_Annonce;
@@ -76,6 +76,6 @@ public class Annonce {
 	String _domaine;
 	String _prix;
 	String _descriptif;
-	String _idUser;
+	String _user;
 
 }

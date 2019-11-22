@@ -3,7 +3,6 @@ package petiteAnnonce.server;
 import java.io.*;
 import java.net.*;
 import java.util.HashSet;
-import java.util.Scanner;
 import java.util.Set;
 
 import petiteAnnonce.client.Annonce;
@@ -19,11 +18,10 @@ public class UserThread extends Thread {
 	private static Informations info;
 	private PrintWriter writer;
 	private String userName;
-	String serverMessage;
+	private String serverMessage;
 	private String limit = "!!";
-	private Scanner input;
 	private String clef;
-	private int cpt_annonce = 0;
+	private static User user;
 
 	Set<Annonce> my_annonces;
 
@@ -45,32 +43,37 @@ public class UserThread extends Thread {
 
 
 
-			writer.println("Enter your name: ");
-			writer.flush();
+			//writer.println("Enter your name: ");
+			//writer.flush();
 
 
-			userName = reader.readLine();
+			userName = reader.readLine().split(limit)[1];
 			add_User(userName, socket);//add the new connected user
+			
+			System.out.println("Welcome "+userName);
 
-
-			serverMessage = "wel-com!!Hi " + userName+"! You are on port "+socket.getPort();//send message to user who comes to connect
+			serverMessage = "wel-com!!"+userName+"! You are on port "+socket.getPort()+" IP: "+InetAddress.getByName(null).getHostAddress();//send message to user who comes to connect
 			accuse_Reception(serverMessage, this);
-			System.out.println("---------------------"+userName);
 
+			String[] clientMessage;
+			
 			do {
 				//System.out.println(my_annonces.size());
+				
 
 				serverMessage = "";
 
-				String[] clientMessage = reader.readLine().split(limit);
-				System.out.println(clientMessage[0]+" has received ");//to see if he really receives from user
+				clientMessage = reader.readLine().split(limit);
 
+				System.out.println("\n---------------------"+userName+", commande: "+clientMessage[0]+"\n");
+				
 				switch(clientMessage[0]) {
 
 				case "add-Ann": 
 					clef = "ack-add"+limit; 
-					String idAnnonce = "Ann00" + (info.getAnnonce().size() + 1);
-					Annonce a = new Annonce(idAnnonce,clientMessage[1], clientMessage[2], clientMessage[3], clientMessage[4],getUserId(userName));
+					info.setnAnnonce(info.getnAnnonce() + 1);
+					String idAnnonce = "Ann00" + info.getnAnnonce();
+					Annonce a = new Annonce(idAnnonce,clientMessage[1], clientMessage[2], clientMessage[3], clientMessage[4],userName);
 					System.out.println(a.toString()+"\n");//to verify all information
 					info.addAnnonce(a);
 					my_annonces.add(a);
@@ -80,11 +83,11 @@ public class UserThread extends Thread {
 				case "all-Ann":
 					clef = "ack-all"+limit;
 					allAnnounces();
+					
 					break;
 
 				case "mes-Ann":
 					clef = "ack-mes"+limit;
-					System.out.println(serverMessage);
 					myAnnounces();
 					break;
 
@@ -105,8 +108,8 @@ public class UserThread extends Thread {
 					break;
 
 				case "bye-bye":
-					clef = "ack-bye"+limit;
-					serverMessage = "Aurevoir";
+					//clef = "ack-bye"+limit;
+					serverMessage = null;
 					break;
 
 				default:
@@ -119,23 +122,15 @@ public class UserThread extends Thread {
 				if(serverMessage != null)
 					accuse_Reception(clef+serverMessage, this);
 
-			} while (true);//!clientMessage[0].equals("bye-bye");
-
-			/*
-			 * for(User uToRemove: info.getUsers()) { if(uToRemove.getUserName() ==
-			 * userName) {
-			 * 
-			 * info.removeUser(uToRemove, this); }
-			 * 
-			 * } socket.close();
-			 */
+			} while (!clientMessage[0].equals("bye-bye"));
+			info.removeUser(user, this);
+			socket.close();
 
 		} catch (IOException ex) {
 			System.out.println("Error in UserThread: " + ex.getMessage());
 			ex.printStackTrace();
 		}
 	}
-
 
 	/**
 	 * Delivers a reply to user who asked
@@ -154,53 +149,31 @@ public class UserThread extends Thread {
 	 */
 
 	public static void add_User(String username, Socket clt) throws IOException {
-		info.setnUsers(info.getnUsers() + 1);
-		String idUser = "User00" + info.getnUsers();
-		User user = new User(idUser, username, clt.getPort());
+	
+		user = new User(username, InetAddress.getByName(null).getHostAddress(), clt.getPort());
 
 		info.addUser(user);
-		System.out.println("nombre d'utilisateur"+info.getnUsers());
+		//System.out.println("\nnombre d'utilisateur "+info.getUsers().size());
 	}
-
-	String getUserId(String userName) {
-		for(User user: info.getUsers()) {
-			if (user.getUserName() == userName) {
-				System.out.println(user.getId_User()+": "+userName);
-				return user.getId_User();
-			}
-		}
-		return null;
-	}
-
-
-	/*
-	 * public void myAnnouncesOld(String user) { cpt_annonce = 0; serverMessage =
-	 * ""; String userId = ""; for(User u: info.getUsers()) { if(u.getUserName() ==
-	 * user) userId = u.getId_User(); } for(Annonce a: info.getAnnonce()) {
-	 * if(userId == a.getIdUser()) { serverMessage += a.toString(); cpt_annonce++; }
-	 * 
-	 * } serverMessage += info.getAnnonce().size(); }
-	 */
-
 
 	public void myAnnounces() {
 		serverMessage = "";
 
 		for(Annonce a: info.getAnnonce()) {
-			if(getUserId(userName) == a.getIdUser()) 
+			if(userName == a.getUser()) 
 				serverMessage += a.toString();
 
 		} 
 		serverMessage += my_annonces.size();
 	}
 
-
 	public void allAnnounces() {
 		serverMessage = "";
 
-		for(Annonce a: info.getAnnonce()) 
+		for(Annonce a: info.getAnnonce()) { 
 			serverMessage += a.toString();	
-
+			System.out.println("\n"+a.toString());
+		}
 		serverMessage += info.getAnnonce().size();
 	}
 
@@ -211,13 +184,12 @@ public class UserThread extends Thread {
 			if(a.getId_Annonce().equals(idAnnounce)) {
 				my_annonces.remove(a);
 				info.getAnnonce().remove(a);
-				System.out.println("suppression OK");
+				System.out.println("\nsuppression OK");
 				return true;
 			}
 		}
-		System.out.println("suppression impossible");
+		System.out.println("\nsuppression impossible");
 		return false;
 	}
-
 
 }

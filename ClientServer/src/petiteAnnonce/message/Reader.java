@@ -26,7 +26,7 @@ public class Reader{
 		final BufferedReader reader;
 		final Scanner sc = new Scanner(System.in);
 
-		socket = new Socket("localhost",2000);
+		socket = new Socket("192.168.137.1",1027);
 		
 		System.out.println("------------------ Client started ----------------");
 
@@ -41,14 +41,16 @@ public class Reader{
 			
 			
 			while (true) {
-				//message = "";
+				String message = "";
 				
-				String message = reader.readLine();
-				System.out.println("\n[Serveur ]: "+message);
+				
 				
 				System.out.print("\nMoi:");
 				message = sc.nextLine();
 				writer.println(message);
+				
+				message = reader.readLine();
+				System.out.println("\n[Serveur ]: "+message);
 				
 			}
 			

@@ -22,7 +22,7 @@ public class Client {
 	private Socket socket;;
 	private String clef;
 	private String limit = "!!";
-	boolean bye = false;
+	
 
 	final static int DEFAULT_PORT_TCP = 1028;
 	protected Informations info;
@@ -50,33 +50,28 @@ public class Client {
 			InputStream inp = socket.getInputStream();
 			reader = new BufferedReader(new InputStreamReader(inp));
 
-			String receive = reader.readLine();
-			System.out.print(receive);
+			//String receive = reader.readLine();
+			//System.out.print(receive);
 
+			System.out.print("Enter your name: ");
+			
 			input = new Scanner(System.in);
 			userName = input.nextLine();
 
 			if (userName != null || userName != "\0") {
-				writer.println(userName);//print the hello message from server
+				writer.println("Connexion!!"+userName+limit);//print the hello message from server
 				writer.flush();
 
 				try {
-					String[] response = reader.readLine().split(limit);
-					System.out.println("\n" + response[0]+"n");
-					if(response[0] == "wel-com")//Ne marche pas, il faut le regler, impossible d'afficher le message recu
-						System.out.println("\n" + response[1]);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-
-				/*
-				 * String menu = ""; while (reader.ready() && ((receive = reader.readLine()) !=
-				 * null)) { menu += receive+"\n"; }
-				 */
+					String[] welcom = reader.readLine().split(limit);
+					if(welcom[0].equals("wel-com")) {
+						
+						System.out.println("\n" +welcom[0]+ welcom[1]);
+					
+				
 
 				do {
-					//System.out.println("\n"+menu);
-
+					boolean bye = false;
 					char choix = '\0';
 
 					try {
@@ -123,10 +118,11 @@ public class Client {
 						case 'f':
 							//sign_out();
 							clef = "bye-bye";
+							System.out.println("Aurevoir!");
 							bye = true;
 							writer.println(clef);
 							writer.flush();
-
+							
 							break;
 
 						default:
@@ -137,7 +133,9 @@ public class Client {
 						}
 
 
-
+						if(bye == true)
+							break;
+						
 						String[] response = reader.readLine().split(limit);
 						//System.out.println("\n"+response);
 
@@ -156,7 +154,7 @@ public class Client {
 								break;
 							}
 							System.out.println("\n'''''''''''''''' All Announces \n");
-							System.out.println("\nId-Ann ------- Titre -------- Domaine -------- Prix -------- Description -------- Id-User\n");
+							System.out.println("\nId-Ann ------- Titre -------- Domaine -------- Prix -------- Description -------- User\n");
 
 							for(int i = 1; i <= cpt; i++)
 								System.out.println(response[i]);
@@ -169,7 +167,7 @@ public class Client {
 								break;
 							}
 							System.out.println("\n'''''''''''''''' My Announces \n");
-							System.out.println("\nId-Ann ------- Titre -------- Domaine -------- Prix -------- Description -------- Id-User\n");
+							System.out.println("\nId-Ann ------- Titre -------- Domaine -------- Prix -------- Description -------- User\n");
 
 							for(int i = 1; i <= cpt; i++)
 								System.out.println(response[i]);
@@ -180,34 +178,36 @@ public class Client {
 							String result = response[1];
 							//System.out.println(result);
 							if(result.equals("1")) {
-								System.out.println("Deleted with success");
+								System.out.println("\nDeleted with success");
 								break;
 							}
-							System.out.println("This announce doesn't exist");
+							System.out.println("\nThis announce doesn't exist");
 							break;
 
 						case "ack-msg":
 
 							break;
-
-						case "ack-bye":
-
-							break;
-
+							
+						/*
+						 * case "ack-bye": bye = true; break;
+						 */
 						default:
 							System.out.println("''''''''''''''''Choise between [a,e] ");
 							break;
-
-
 						}
-
 
 					} catch (IOException e) {
 
 						e.printStackTrace();
 					}
 				}while (true);
-
+				
+				//socket.close();
+				}
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				
 			}
 
 		} catch (IOException e) {
@@ -256,7 +256,9 @@ public class Client {
 
 		if (args.length <= 1) {
 			hostname = "localhost";
-			port = DEFAULT_PORT_TCP;
+			hostname = "192.168.137.1";
+			//port = DEFAULT_PORT_TCP;
+			port = 1027;
 		} else {
 			hostname = InetAddress.getByName(args[0]).getHostName();
 			port = Integer.parseInt(args[1]);
