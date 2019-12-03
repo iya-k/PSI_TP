@@ -1,16 +1,18 @@
-package petiteAnnonce.client;
+package petiteAnnonce.server;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import petiteAnnonce.server.UserThread;
+
+import petiteAnnonce.client.*;
 
 class Message{
-	
+
 	protected String intitule;
 	protected String idMsg;
 	protected String _src;
 	protected String _dest;
-	
+
 	public Message(String id, String corps, String src, String dest) {
 		idMsg = id;
 		intitule = corps;
@@ -23,71 +25,70 @@ public class Informations {
 
 	private Set<User> users;
 	private Set<UserThread> userThreads;
-	protected Set<Annonce> an;
+	protected Set<Annonce> annnonces;
 	private int nAnnonce;
-	//public Scanner input;
 	public Set<Message> msg;
+	public HashMap<String,UserThread> couple;
 
-	public Set<User> getUsers() {
+	public synchronized Set<User> getUsers() {
 		return users;
 	}
 
-	public void setUsers(Set<User> users) {
+	public synchronized void setUsers(Set<User> users) {
 		this.users = users;
 	}
 
-	public Set<UserThread> getUserThreads() {
+	public synchronized Set<UserThread> getUserThreads() {
 		return userThreads;
 	}
 
-	public void setUserThreads(Set<UserThread> userThreads) {
+	public synchronized void setUserThreads(Set<UserThread> userThreads) {
 		this.userThreads = userThreads;
 	}
 
-	public Set<Annonce> getAnnonce() {
-		return an;
+	public synchronized Set<Annonce> getAnnonce() {
+		return annnonces;
 	}
 
-	public void setAnnonce(Set<Annonce> an) {
-		this.an = an;
+	public synchronized void setAnnonce(Set<Annonce> an) {
+		this.annnonces = an;
 	}
 
-	public void addAnnonce(Annonce a) {
+	public synchronized void addAnnonce(Annonce a) {
 
-		an.add(a);
+		annnonces.add(a);
 	}
 
-	public void delAnnonce(Annonce a) {
+	public synchronized void delAnnonce(Annonce a) {
 
-		an.remove(a);
+		annnonces.remove(a);
 	}
 
 	/**
 	 * @return the nAnnonce
 	 */
-	public int getnAnnonce() {
+	public synchronized int getnAnnonce() {
 		return nAnnonce;
 	}
 
 	/**
 	 * @param nAnnonce the nAnnonce to set
 	 */
-	public void setnAnnonce(int nAnnonce) {
+	public synchronized void setnAnnonce(int nAnnonce) {
 		this.nAnnonce = nAnnonce;
 	}
 
 	/**
 	 * Stores newly connected client.
 	 */
-	public void addUser(User user) {
-
+	public synchronized void addUser(User user) {
 		users.add(user);
 	}
 
 	/**
 	 * When a client is disconneted, removes the associated user and UserThread
 	 */
-	public void removeUser(User u, UserThread aUser) {
+	public synchronized void removeUser(User u, UserThread aUser) {
 		boolean removed = users.remove(u);
 		if (removed) {
 			userThreads.remove(aUser);
@@ -96,25 +97,78 @@ public class Informations {
 	}
 
 	/**
-	 * Returns true if there are other users connected (not count the currently
-	 * connected user)
+	 * Returns true if there are other users connected Ò
 	 */
-	public boolean hasUser(String userName) {
+	public synchronized boolean hasUser(String userName) {
 		boolean exist = false;
 		for (User user : users) {
-			if (user.username == userName)
+			if (user.getUserName() == userName)
 				exist = true;
 		}
 		return exist;
 	}
 
+
+
+	public synchronized UserThread getUserThread(String user) {
+
+		if(couple.containsKey(user)) {
+			UserThread aUser = couple.get(user);
+			//System.out.println(lecteur+":"+aUser.getName());
+			return aUser;
+		}
+		return null;
+	}
+
 	
+	  public synchronized void signal(User u, String message) {
+		  for(User aUser: users) {
+			  if(aUser == u) {
+				  u.getPw().println(message);
+				  u.getPw().flush();
+			  }
+				  
+		  }
+	  }
+	 
+
+
+	public synchronized void accuse_Reception(String message, UserThread recepteur, User u) {
+		//System.out.println("envoie "+message+" à "+recepteur);
+
+		for (UserThread aUser : userThreads) {
+			if (aUser == recepteur) {
+				aUser.send(message, u);
+			}
+		}
+	}
+	
+	public synchronized String getUserByAnnonce(String annonceId) {
+
+		for (Annonce a : annnonces) {
+			if (a.getId_Annonce().equals(annonceId))
+				return a.getUser();
+		}
+		return null;
+	}
+
+	public synchronized User getUserByUserName(String userName) {
+
+		for (User user : users) {
+			System.out.println(user.getUserName());
+			if (user.getUserName().equals(userName))
+				return user;
+		}
+		return null;
+	}
+
 	public Informations() {
 		users = new HashSet<>();
 		userThreads = new HashSet<>();
-		an = new HashSet<>();
+		annnonces = new HashSet<>();
 		nAnnonce = 0;
 		msg = new HashSet<>();
+		couple = new HashMap<>();
 	}
 
 }

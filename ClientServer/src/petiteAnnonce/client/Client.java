@@ -4,10 +4,7 @@ import java.net.*;
 import java.util.Scanner;
 import java.io.*;
 
-import petiteAnnonce.message.Communication;
-import petiteAnnonce.message.Readers;
-import petiteAnnonce.message.Writers;
-import petiteAnnonce.securite.AES;
+import petiteAnnonce.message.ClientCommunication;
 import petiteAnnonce.message.ServerCommunication;
 import petiteAnnonce.server.Informations;
 
@@ -23,14 +20,16 @@ public class Client {
 	private String host;
 	private String userName;
 	private int port;
+	private String portEcoute;
 	public Scanner input;
 	private static Socket socket;;
 	private String clef;
 	private String limit = "!!";
 	String destinateur = "";
-	AES safety = new AES();
+
+	static AffichageMessage verbose = new AffichageMessage();
 	String key = "Client";
-	
+
 
 	final static int DEFAULT_PORT_TCP = 1028;
 	protected Informations info;
@@ -48,7 +47,7 @@ public class Client {
 
 			socket = new Socket(host, port);
 
-			System.out.println("------------- Bienvenue sur la plateforme de vente entre particulier "+socket.getPort()+":"+"---------------\n ");
+			System.out.println("------------- Bienvenue sur la plateforme de vente entre particulier "+socket.getPort()+" ---------------\n ");
 
 			OutputStream output;
 			output = socket.getOutputStream();
@@ -56,30 +55,46 @@ public class Client {
 			writer = new PrintWriter(output, true);
 			InputStream inp = socket.getInputStream();
 			reader = new BufferedReader(new InputStreamReader(inp));
-
-			//String receive = reader.readLine();
-			//System.out.print(receive);
-
-			System.out.print("Enter your name: ");
-			
 			input = new Scanner(System.in);
-			userName = input.nextLine();
 
-			if (userName != null || userName != "\0") {
-				writer.println(safety.encrypt("Connexion"+limit+userName+limit, key));//print the hello message from server
-				//System.out.println(safety.encrypt("Connexion"+limit+userName+limit, key));//print the hello message from server
-				writer.flush();
+			String test = "";
+			String encore = "Name or Port Alredy exist, Please try again";
 
-				try {
-					String rep = safety.decrypt(reader.readLine(), key);
-					String[] welcom = rep.split(limit);
-					if(welcom[0].equals("wel-com")) {
-						
-						System.out.println("\n" +welcom[0]+ welcom[1]);
+			String rep = null;
+			do {
+
+				System.out.print("\nEnter your name: ");
+
+				input = new Scanner(System.in);
+				userName = input.nextLine();
+
+				System.out.print("\nEnter your Listen port: ");
+
+				input = new Scanner(System.in);
+				portEcoute = input.nextLine();
+
+				if ((!userName.equals(null) && !userName.equals("")) && (!portEcoute.equals("") && !portEcoute.equals(null))) {
+					verbose.writeSecure(writer,"Connexion"+limit+userName+limit+portEcoute+limit, key);
+
+					rep = verbose.readSecure(reader.readLine(), key);
+					test = rep.split(limit)[3];
 					
-						String  corpus = "";
+					if(test.equals(encore))
+						System.out.println(encore);
+				}
+			}while(test.equals(encore));
+
+			String[] acceuil = rep.split(limit);
+
+
+			if(acceuil[0].equals("wel-com")) {
+
+				System.out.println("\n" +acceuil[0]+ " "+ acceuil[2]+ acceuil[3]);
+
+				boolean flag = false;
 
 				do {
+
 					boolean bye = false;
 					char choix = '\0';
 					BufferedReader saisie = new BufferedReader(new InputStreamReader(System.in));
@@ -87,10 +102,17 @@ public class Client {
 
 						System.out.print(" \n\n ======================== \n"
 								+ "|| a. Add                ||\n|| b. All Announces      ||\n|| c. My Annonces        ||\n|| "
-								+ "d. Send Messages      ||\n|| e. Delete An Annouce  ||\n|| f. Quit               ||"
-								+ "\n ======================== \n\n"
-								+ "Votre choix: ");
+								+ "d. Delete An Annouce  ||\\n|| e. Delete An Annouce  ||\n|| f. Quit               ||"
+								+ "\n ======================== \n"
+								+ "\nVotre choix: ");
 
+
+						/*
+						 * if(flag) { for(int i = 0; i < 2; i++) { try { Thread.sleep(1000); } catch
+						 * (InterruptedException e1) {
+						 * System.out.println("erreur Thread.sleep dans execute: "+this.getClass().
+						 * getName()); e1.printStackTrace(); } } }
+						 */
 						choix =  input.next().charAt(0);
 						switch (choix) {
 						case 'a':
@@ -99,69 +121,62 @@ public class Client {
 							break;
 						case 'b':
 							clef = "all-Ann"+limit;
-							writer.println(safety.encrypt(clef,key));
-							writer.flush();
+							verbose.writeSecure(writer,clef,key);
 
 							break;
 						case 'c':
 							clef = "mes-Ann";
-							writer.println(safety.encrypt(clef,key));
-							writer.flush();
-							
-							break;
-						case 'd':
-							
-							clef = "snd-Msg";
-							System.out.print("\nThe destinator:");
-							String dest = saisie.readLine();
-							//System.out.println(dest);
-							//System.out.print("\n[Corpus]:");
-							//corpus = saisie.readLine();
-							writer.println(clef+limit+dest+limit);
-							writer.flush();
-							
+							verbose.writeSecure(writer,clef,key);
+
 							break;
 
-						case 'e':
-							
+						case 'd':
+
 							System.out.print("\nId Announce to delete:");
 							String annonce_to_delete = saisie.readLine();
 							clef = "del-Ann"+limit;
-							writer.println(safety.encrypt(clef+annonce_to_delete,key));
-							writer.flush();
+							verbose.writeSecure(writer,clef+annonce_to_delete,key);
+
 							break;
 
+						case 'e':
+
+							clef = "snd-Msg";
+							System.out.print("\nWhich Announce interest you ?? ");
+							String annonce = saisie.readLine();
+							verbose.writeSecure(writer,clef+limit+annonce+limit,key);
+
+							break;
 						case 'f':
-							//sign_out();
 							clef = "bye-bye";
-							System.out.println("Aurevoir!");
+							System.out.println("\nAurevoir!");
 							bye = true;
-							writer.println(safety.encrypt(clef,key));
-							writer.flush();
-							
+							verbose.writeSecure(writer,clef,key);
+
 							break;
 
 						default:
-							writer.println(safety.encrypt("default",key));
-							writer.flush();
+							verbose.writeSecure(writer,"default",key);
 
 							break;
 						}
 
-
 						if(bye == true)
 							break;
-						
-						rep = safety.decrypt(reader.readLine(), key);
+
+						rep = verbose.readSecure(reader.readLine(), key);
 						String[] response = rep.split(limit);
-						
+
+						//System.out.println(response[0]);
 
 						int cpt = 0;
 
 						switch(response[0]) {
 
 						case "ack-add":
-							System.out.println("\n'''''''''''''''' Annonce sauvegardee avec succes\n");
+
+							System.out.println("\n'''''''''''''''' Annonce sauvegardee avec succes");
+							flag = true;
 							break;
 
 						case "ack-all":
@@ -172,14 +187,14 @@ public class Client {
 							}
 							System.out.println("\n'''''''''''''''' All Announces \n");
 							System.out.println("\nId-Ann ------- Titre -------- Domaine -------- Prix -------- Description -------- User\n");
-							
+
 							int i = 0;
 							int t = 1;
 							while(i < cpt) {
 								System.out.println(response[++t]);
 								i++;
 							}
-							
+
 							break;
 
 						case "ack-mes":
@@ -210,40 +225,27 @@ public class Client {
 							break;
 
 						case "ack-msg":
-							
-							/*
-							 * 
-							 * verifier si le destinaire est connecte, envoyer un message au client pour qu'il envoie son message.
-							 * 
-							 * pour que ça ne repete pas la meme chose à l'envoie du message, je declare une variable pour que
-							 * 
-							 * apres verification du dest qu'il ne le refasse pas
-							 * 
-							 */
-							//System.out.println(response[response.length - 1]);
+
 							if(response[1].equals("0")) {
-								System.out.println("\n"+response[1]);
+								System.out.println("\n"+response[2]);
 								break;
 							}
-								
-							
-							//je cree une socket avec mon ip et le port du destinateur
-							
-							//destinateur = response[2];
-							
-							//new Writers(socket, userName).start();
-							Socket s = new Socket(host, (Integer.parseInt(response[3])-1000));
-							System.out.println(response[3]);
-							//Communication comClient = new Communication(s,response[2]);
-							//comClient.CommunicationClient();
-							
+
+							try {
+								new ClientCommunication(Integer.parseInt(response[3]),host).main(null);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							};
+							//System.out.println(response[3]);
+
 							break;
-							
+
 						case "cou-cou":
-							Communication com = new Communication(socket.getLocalPort() - 1000);
-							com.communicationServer();
+							//System.out.println("Bien recu");
+							new ServerCommunication(portEcoute).execute();
 							break;
-								 
+
 						default:
 							System.out.println("''''''''''''''''Choise between [a,e] ");
 							break;
@@ -254,14 +256,11 @@ public class Client {
 						e.printStackTrace();
 					}
 				}while (true);
-				
-				//socket.close();
-				}
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-				
+
 			}
+
+
+			socket.close();
 
 		} catch (IOException e) {
 
@@ -269,10 +268,7 @@ public class Client {
 			e.printStackTrace();
 		}
 
-
-
 	}
-
 
 	public void add_Announce() {
 		String annonce;
@@ -293,13 +289,13 @@ public class Client {
 		descriptif = input.nextLine();
 
 		annonce = clef+limit+titre+limit+domaine+limit+prix+limit+descriptif;
-		writer.println(safety.encrypt(annonce, key));
-		writer.flush();
+		verbose.writeSecure(writer,annonce, key);
+
 
 	}
 
 	//une fois la communication établie, il ne passe plus par le serveur donc pas besoin de tester
-	
+
 
 	public static void main(String[] args) throws IOException {
 
@@ -307,16 +303,16 @@ public class Client {
 		int port;
 
 		if (args.length > 1) {
-			
+
 			hostname = InetAddress.getByName(args[0]).getHostName();
 			port = Integer.parseInt(args[1]);
-			
+
 		}else if (args.length == 1) {
 			hostname = "localhost";
 			port = Integer.parseInt(args[0]);
 		}
 		else {
-			
+
 			hostname = "localhost";
 			//hostname = "192.168.137.1";
 			port = DEFAULT_PORT_TCP;
@@ -324,8 +320,8 @@ public class Client {
 		}
 
 		Client client = new Client(hostname, port);
-		
+
 		client.execute();
-		
+
 	}
 }

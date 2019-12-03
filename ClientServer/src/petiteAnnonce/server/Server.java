@@ -2,9 +2,6 @@ package petiteAnnonce.server;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
-
-import petiteAnnonce.client.*;
 
 public class Server {
 
@@ -21,7 +18,7 @@ public class Server {
 	public void execute() {
 		try (ServerSocket serverSocket = new ServerSocket(port)) {
 
-			System.out.println("--------------- Server is listening on port " + PORT_TCP + " --------------");
+			System.out.println("--------------- Gestionnaire is listening on port " + port + " --------------");
 
 			while (true) {
 				Socket socket = serverSocket.accept();
@@ -48,6 +45,4 @@ public class Server {
 		Server server = new Server(port);
 		server.execute();
 	}
-
-	
 }
