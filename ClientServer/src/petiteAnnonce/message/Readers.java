@@ -4,64 +4,50 @@ import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 
+import petiteAnnonce.client.AffichageMessage;
+import petiteAnnonce.securite.UserSecure;
+
 /**
  * @author KABA
  *
  */
-public class Reader{
+public class Readers extends Thread{
+
 	private static Socket socket;
-	private String userName;
+	private UserSecure user;
+	private  BufferedReader reader;
+	private static  PrintWriter writer;
 
-	/*
-	 * public Reader(Socket socket, String client) { this.socket = socket;
-	 * this.userName = client;
-	 * 
-	 * }
-	 */
-
-	public static void main(String[] args) throws IOException {
+	static AffichageMessage verbose = new AffichageMessage();
+	String clef = "lus-lus";
+	String limit = "!!";
+	boolean bye = false;
 
 
-		final PrintWriter writer;
-		final BufferedReader reader;
-		final Scanner sc = new Scanner(System.in);
+	public Readers(UserSecure aUser) { 
 
-		socket = new Socket("192.168.137.1",1027);
+		reader = aUser.getBr();
+		writer = aUser.getPw();
+		user = aUser;
+		//message = msg;
+	}
+	
+	public void run() {
 		
-		System.out.println("------------------ Client started ----------------");
-
-		OutputStream output;
 		try {
-			output = socket.getOutputStream();
+			String message;
+			do{
 
-			writer = new PrintWriter(output, true);
-			InputStream input = socket.getInputStream();
-			reader = new BufferedReader(new InputStreamReader(input));
+				 message = reader.readLine();
+				System.out.println("\n["+user.getUserName()+"]: "+message+"\n");
+				verbose.write(writer,clef+limit);
 
-			
-			
-			while (true) {
-				String message = "";
-				
-				
-				
-				System.out.print("\nMoi:");
-				message = sc.nextLine();
-				writer.println(message);
-				
-				message = reader.readLine();
-				System.out.println("\n[Serveur ]: "+message);
-				
-			}
-			
+			}while (!message.equals("bye")) ;
+
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		//writer.close();
-        //socket.close();
-		
-	}
 
+	}
 
 }

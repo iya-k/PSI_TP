@@ -12,9 +12,11 @@ import java.util.Scanner;
 public class ServerCommunication extends Thread {
 	
 	private static int portEcoute;
+	private static String buyer;
 	
-	public ServerCommunication(String port) {
+	public ServerCommunication(String port, String acheteur) {
 		portEcoute = Integer.parseInt(port);
+		buyer = acheteur;
 		
 	}
 	public ServerCommunication() {
@@ -24,14 +26,11 @@ public class ServerCommunication extends Thread {
 @SuppressWarnings("resource")
 public static void execute() throws IOException{
 		
-		System.out.println("\n============= Communication Vendeur =====================\n");
-		
-		//int port_dest = 0;
+		System.out.println("\n============= Communication Vendeur: "+portEcoute+" =====================\n");
 		
 		Scanner inFromMe = new Scanner(System.in);
 		DatagramSocket serverSocket= new DatagramSocket(portEcoute);
 		String msg, sentence;
-		//boolean flag = true;
         
         while(true){
         	byte[] receiveData = new byte[1024];
@@ -41,7 +40,7 @@ public static void execute() throws IOException{
         	sentence = new String(receivePacket.getData());
         	int port_dest = receivePacket.getPort();
         	
-            System.out.println("\nClient: "+sentence);
+            System.out.println("\n"+buyer+": "+sentence);
             
             if(sentence.equals("bye"))
 				break;
@@ -56,14 +55,12 @@ public static void execute() throws IOException{
             if(msg.equals("bye"))
 			break;
            
-            
         }
-        System.out.println("Aurevoir");
+        System.out.println("\nAurevoir");
         
         serverSocket.close();
 	}
 
-	
 	  public static void main(String args[]) throws IOException {
 	  
 	  ServerCommunication.execute();

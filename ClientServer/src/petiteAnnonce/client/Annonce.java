@@ -68,7 +68,7 @@ public class Annonce {
 	
 	public String toString() {
 		
-		return "\t"+getId_Annonce()+" -------- "+getTitre()+" ------- "+getDomaine()+" ------- "+getPrix()+"$ --------- "+getDescriptif()+" ---------"+getUser()+"---!!";
+		return "\t"+getId_Annonce()+" -------- "+getTitre()+" ------- "+getDomaine()+" ------- "+getPrix()+".00 $ --------- "+getDescriptif()+" --------- "+getUser()+" !!";
 	}
 	
 	String _id_Annonce;

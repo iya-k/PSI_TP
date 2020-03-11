@@ -11,30 +11,31 @@ public class ClientCommunication{
 
 	private static int port_dest;
 	private static String hostname;
+	private static String seller;
 
-	public ClientCommunication(int port, String host) {
+	public ClientCommunication(int port, String host, String vendeur) {
 		port_dest = port;
 		hostname = host;
+		seller = vendeur;
 
 	}
 
 	@SuppressWarnings("resource")
-	public static void main(String args[]) throws Exception {
+	public static void execute() throws Exception {
 		/*
 		 * port_dest = 1010; hostname = "localhost";
 		 */
 		String toSend = "", receive = "";
-		System.out.println("\n============= Communication Acheteur =====================\n");
+		System.out.println("\n============= Communication Acheteur: "+port_dest+" =====================\n");
 		
 		DatagramSocket clientSocket;
-		//boolean flag = false;
+		
 		do {
 			System.out.print("\nMoi: ");
 			Scanner inFromMe = new Scanner(System.in);
 			clientSocket = new DatagramSocket();
 			clientSocket.connect(InetAddress.getByName(hostname), port_dest);
-			//InetAddress IPAddress = InetAddress.getByName(hostname);
-
+			
 			toSend = inFromMe.nextLine();
 			byte[] sendData = toSend.getBytes();
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, clientSocket.getInetAddress(), clientSocket.getPort());
@@ -48,7 +49,7 @@ public class ClientCommunication{
 			clientSocket.receive(receivePacket);
 			receive = new String(receivePacket.getData());
 			
-			System.out.println("\nServeur: "+receive);
+			System.out.println("\n"+seller+": "+receive);
 			
 		}while(true);
 		
@@ -56,6 +57,9 @@ public class ClientCommunication{
 		clientSocket.disconnect();
 		clientSocket.close();
 		
+	}
+	public static void main(String args[]) throws Exception {
+		ClientCommunication.execute();
 	}
 
 }

@@ -2,11 +2,12 @@ package petiteAnnonce.client;
 
 import java.net.*;
 import java.util.Scanner;
-import java.io.*;
 
 import petiteAnnonce.message.ClientCommunication;
 import petiteAnnonce.message.ServerCommunication;
 import petiteAnnonce.server.Informations;
+
+import java.io.*;
 
 /**
  * @author KABA
@@ -15,30 +16,30 @@ import petiteAnnonce.server.Informations;
 
 public class Client {
 
-	private BufferedReader reader;
+	private BufferedReader reader, saisie;
+	public Scanner input;
 	private PrintWriter writer;
 	private String host;
-	private String userName;
 	private int port;
+	private String userName;
 	private String portEcoute;
-	public Scanner input;
 	private static Socket socket;;
 	private String clef;
 	private String limit = "!!";
-	String destinateur = "";
-
-	static AffichageMessage verbose = new AffichageMessage();
-	String key = "Client";
-
+	private String toSend = "";
+	private String mdp;
+	private String key = "annonce";
+	private static AffichageMessage verbose = new AffichageMessage();
+	
 
 	final static int DEFAULT_PORT_TCP = 1028;
 	protected Informations info;
 
+	
 	public Client(String hostname, int port) {
 
 		this.host = hostname;
 		this.port = port;
-
 	}
 
 	public void execute() {
@@ -57,8 +58,7 @@ public class Client {
 			reader = new BufferedReader(new InputStreamReader(inp));
 			input = new Scanner(System.in);
 
-			String test = "";
-			String encore = "Name or Port Alredy exist, Please try again";
+			String test = "1";
 
 			String rep = null;
 			do {
@@ -67,52 +67,59 @@ public class Client {
 
 				input = new Scanner(System.in);
 				userName = input.nextLine();
+				
+				System.out.print("\nEnter your password: ");
+
+				input = new Scanner(System.in);
+				mdp = input.nextLine();
 
 				System.out.print("\nEnter your Listen port: ");
 
 				input = new Scanner(System.in);
+				//portEcoute = input.nextInt();
 				portEcoute = input.nextLine();
-
+				//System.out.println(userName+" "+ mdp+ " "+ portEcoute);
 				if ((!userName.equals(null) && !userName.equals("")) && (!portEcoute.equals("") && !portEcoute.equals(null))) {
-					verbose.writeSecure(writer,"Connexion"+limit+userName+limit+portEcoute+limit, key);
+					
+					verbose.writeSecure(writer, "Connexion"+limit+userName+limit+mdp+limit+portEcoute+limit, key);
+
+					//System.out.println(/*writer,*/"Connexion"+limit+userName+limit+mdp+limit+portEcoute+limit);
 
 					rep = verbose.readSecure(reader.readLine(), key);
-					test = rep.split(limit)[3];
+					test = rep.split(limit)[1];
 					
-					if(test.equals(encore))
-						System.out.println(encore);
+					if(test.equals("0"))
+						System.out.println(rep.split(limit)[1]);
 				}
-			}while(test.equals(encore));
+				System.out.println(/*writer,*/"Connexion"+limit+userName+limit+mdp+limit+portEcoute+limit);
 
-			String[] acceuil = rep.split(limit);
+				System.out.println(rep.split(limit)[1]);
+			}while(test.equals("0"));
+			
+			key = mdp;
+			//System.out.println(key);
 
+			String[] accueil = rep.split(limit);
 
-			if(acceuil[0].equals("wel-com")) {
+			if(accueil[0].equals("wel-com")) {
 
-				System.out.println("\n" +acceuil[0]+ " "+ acceuil[2]+ acceuil[3]);
-
-				boolean flag = false;
+				//System.out.println("\n" +accueil[0]+ " "+ accueil[2]+ accueil[3]);
 
 				do {
 
+					boolean chat = false;
+					
 					boolean bye = false;
 					char choix = '\0';
-					BufferedReader saisie = new BufferedReader(new InputStreamReader(System.in));
+					saisie = new BufferedReader(new InputStreamReader(System.in));
 					try {
 
-						System.out.print(" \n\n ======================== \n"
+						System.out.print(" \n\n ========= MENU ========= \n"
 								+ "|| a. Add                ||\n|| b. All Announces      ||\n|| c. My Annonces        ||\n|| "
-								+ "d. Delete An Annouce  ||\\n|| e. Delete An Annouce  ||\n|| f. Quit               ||"
-								+ "\n ======================== \n"
+								+ "d. Delete an Annouce  ||\n|| e. Send a Message     ||\n|| f. Answer Messages    ||\n|| "
+								+ "g. Quit               ||\n ======================== \n"
 								+ "\nVotre choix: ");
 
-
-						/*
-						 * if(flag) { for(int i = 0; i < 2; i++) { try { Thread.sleep(1000); } catch
-						 * (InterruptedException e1) {
-						 * System.out.println("erreur Thread.sleep dans execute: "+this.getClass().
-						 * getName()); e1.printStackTrace(); } } }
-						 */
 						choix =  input.next().charAt(0);
 						switch (choix) {
 						case 'a':
@@ -120,22 +127,23 @@ public class Client {
 
 							break;
 						case 'b':
-							clef = "all-Ann"+limit;
-							verbose.writeSecure(writer,clef,key);
+							clef = "all-Ann";
+							toSend = clef+limit;
 
 							break;
 						case 'c':
 							clef = "mes-Ann";
-							verbose.writeSecure(writer,clef,key);
+							toSend = clef+limit;
+							System.out.println(socket.getLocalPort());
 
 							break;
 
 						case 'd':
 
+							clef = "del-Ann";
 							System.out.print("\nId Announce to delete:");
 							String annonce_to_delete = saisie.readLine();
-							clef = "del-Ann"+limit;
-							verbose.writeSecure(writer,clef+annonce_to_delete,key);
+							toSend = clef+limit+annonce_to_delete+limit;
 
 							break;
 
@@ -144,50 +152,62 @@ public class Client {
 							clef = "snd-Msg";
 							System.out.print("\nWhich Announce interest you ?? ");
 							String annonce = saisie.readLine();
-							verbose.writeSecure(writer,clef+limit+annonce+limit,key);
+							toSend = clef+limit+annonce+limit;
 
 							break;
+							
 						case 'f':
+							toSend = "";
+							chat = true;
+							break;
+							
+						case 'g':
 							clef = "bye-bye";
+							toSend = clef+limit;
 							System.out.println("\nAurevoir!");
 							bye = true;
-							verbose.writeSecure(writer,clef,key);
 
 							break;
 
 						default:
-							verbose.writeSecure(writer,"default",key);
+							clef = "default";
+							toSend = clef+limit;
 
 							break;
 						}
-
+						
+						if(!toSend.equalsIgnoreCase(""))//pour severCommunication
+							//System.out.println(toSend);
+							verbose.writeSecure(writer, toSend, key);
+						
 						if(bye == true)
 							break;
-
-						rep = verbose.readSecure(reader.readLine(), key);
-						String[] response = rep.split(limit);
-
-						//System.out.println(response[0]);
-
+						
+						String[] response = verbose.readSecure(reader.readLine(), key).split(limit);;
+						String serverResponse;
 						int cpt = 0;
+						
+						if(!toSend.equalsIgnoreCase(""))//pour severCommunication
+							serverResponse = response[0];
 
-						switch(response[0]) {
+						else 
+							serverResponse = "cou-cou";
+
+						switch(serverResponse) {
 
 						case "ack-add":
-
-							System.out.println("\n'''''''''''''''' Annonce sauvegardee avec succes");
-							flag = true;
+							verbose.affichage("ajout");
 							break;
 
 						case "ack-all":
 							cpt = Integer.parseInt(response[1]);
 							if(cpt <= 0) {
-								System.out.println("\nNot yet any announce");
+								verbose.affichage("0annonce");
 								break;
 							}
 							System.out.println("\n'''''''''''''''' All Announces \n");
-							System.out.println("\nId-Ann ------- Titre -------- Domaine -------- Prix -------- Description -------- User\n");
-
+							verbose.affichage("entete");
+							
 							int i = 0;
 							int t = 1;
 							while(i < cpt) {
@@ -197,15 +217,14 @@ public class Client {
 
 							break;
 
-						case "ack-mes":
+						case "ack-spe":
 							cpt = Integer.parseInt(response[1]);
 							if(cpt <= 0) {
-								System.out.println("\nYou don't have any announce");
+								verbose.affichage("0myannonce");
 								break;
 							}
 							System.out.println("\n'''''''''''''''' My Announces \n");
-							System.out.println("\nId-Ann ------- Titre -------- Domaine -------- Prix -------- Description -------- User\n");
-
+							verbose.affichage("entete");
 							i = 0;
 							t = 1;
 							while(i < cpt) {
@@ -216,12 +235,11 @@ public class Client {
 
 						case "ack-del":
 							String result = response[1];
-							//System.out.println(result);
 							if(result.equals("1")) {
-								System.out.println("\nDeleted with success");
+								verbose.affichage("suppressionOK");
 								break;
 							}
-							System.out.println("\nThis announce doesn't exist");
+							verbose.affichage("suppressionKO");
 							break;
 
 						case "ack-msg":
@@ -232,27 +250,27 @@ public class Client {
 							}
 
 							try {
-								new ClientCommunication(Integer.parseInt(response[3]),host).main(null);
+								new ClientCommunication(Integer.parseInt(response[3]),host, response[2]).execute();
 							} catch (Exception e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							};
-							//System.out.println(response[3]);
 
 							break;
 
 						case "cou-cou":
-							//System.out.println("Bien recu");
-							new ServerCommunication(portEcoute).execute();
+							if(chat)
+								new ServerCommunication(portEcoute, response[1]).execute();
+							chat = false;
 							break;
 
 						default:
-							System.out.println("''''''''''''''''Choise between [a,e] ");
+							System.out.println("\n''''''''''''''''Choise between [a,e] ");
+							System.out.println(response[0]);
 							break;
 						}
 
 					} catch (IOException e) {
-
+						saisie.close();
 						e.printStackTrace();
 					}
 				}while (true);
@@ -271,7 +289,6 @@ public class Client {
 	}
 
 	public void add_Announce() {
-		String annonce;
 		String titre;
 		String domaine;
 		String prix;
@@ -288,14 +305,8 @@ public class Client {
 		System.out.print("\nDescriptif: ");
 		descriptif = input.nextLine();
 
-		annonce = clef+limit+titre+limit+domaine+limit+prix+limit+descriptif;
-		verbose.writeSecure(writer,annonce, key);
-
-
+		toSend = clef+limit+titre+limit+domaine+limit+prix+limit+descriptif;
 	}
-
-	//une fois la communication établie, il ne passe plus par le serveur donc pas besoin de tester
-
 
 	public static void main(String[] args) throws IOException {
 
@@ -322,6 +333,5 @@ public class Client {
 		Client client = new Client(hostname, port);
 
 		client.execute();
-
 	}
 }

@@ -1,5 +1,6 @@
 package petiteAnnonce.server;
 
+
 /**
  * @author KABA
  *
@@ -10,9 +11,7 @@ import java.net.*;
 import java.util.HashSet;
 import java.util.Set;
 
-import petiteAnnonce.client.Annonce;
-import petiteAnnonce.client.AffichageMessage;
-import petiteAnnonce.client.User;
+import petiteAnnonce.client.*;
 
 public class UserThread extends Thread {
 	private Socket socket;
@@ -24,13 +23,12 @@ public class UserThread extends Thread {
 	private String limit = "!!";
 	private String clef;
 	private static User user;
-	//private int portEcoute;
-	boolean first_connexion = false;
+	boolean add_announce = false;
 	int port_dest ;
 	String host_dest ;
 	String destName = "";
 	static AffichageMessage verbose = new AffichageMessage();
-	String key = "Client";
+	String key = "annonce";
 
 	Set<Annonce> my_annonces;
 
@@ -55,15 +53,16 @@ public class UserThread extends Thread {
 			int ajout = 0;
 			do {
 				ajout = add_User(rep.split(limit)[1], Integer.parseInt(rep.split(limit)[2]));//add the new connected user
-				if(ajout == 0)
-					bienvenue = "Name or Port Alredy exist, Please try again";
-				else
+				if(ajout == 0) {
+					info.accuse_Reception("wel-com!!"+ajout+limit+rep.split(limit)[1]+limit+"Name or Port Alredy exist, Please try again"+limit, this, user);
+					
+				}
+				else {
 					bienvenue = ", you are on port "+socket.getPort()+" IP: "+InetAddress.getByName(null).getHostAddress();//send message to user who comes to connect
 
-				info.accuse_Reception("wel-com!!"+ajout+limit+rep.split(limit)[1]+limit+bienvenue+limit, this, user);
-				userName = rep.split(limit)[1];
-
-				rep = verbose.readSecure(reader.readLine(), key);
+					info.accuse_Reception("wel-com!!"+ajout+limit+rep.split(limit)[1]+limit+bienvenue+limit, this, user);
+					userName = rep.split(limit)[1];
+				}
 
 			}while(ajout == 0);
 
@@ -71,6 +70,11 @@ public class UserThread extends Thread {
 
 			System.out.println("Welcome "+userName);
 
+			key = rep.split(limit)[2];
+			//System.out.println(key);
+			
+			rep = verbose.readSecure(reader.readLine(), key);
+			
 			String[] clientMessage;
 
 			do {
@@ -87,9 +91,10 @@ public class UserThread extends Thread {
 					info.setnAnnonce(info.getnAnnonce() + 1);
 					String idAnnonce = "Ann00" + info.getnAnnonce();
 					Annonce a = new Annonce(idAnnonce,clientMessage[1], clientMessage[2], clientMessage[3], clientMessage[4],userName);
-					System.out.println(a.toString()+"\n");//to verify all information
+					System.out.println(a.toString()+"\n");//to verify all informations
 					info.addAnnonce(a);
 					my_annonces.add(a);
+					add_announce = true;
 
 					break;
 
@@ -100,7 +105,7 @@ public class UserThread extends Thread {
 					break;
 
 				case "mes-Ann":
-					clef = "ack-mes"+limit;
+					clef = "ack-spe"+limit;
 					myAnnounces();
 					break;
 
@@ -121,25 +126,28 @@ public class UserThread extends Thread {
 
 					User destUser = info.getUserByUserName(destName);
 
+					int exist = 0;
 					if(destName == userName) {
 						System.out.println("Vous ne pouvez pas vous envoyer un message");
 						break;
 					}
 
-					int exist = 1;
+					
 
 					if(destUser == null) {
-						exist = 0;
+						
 						serverMessage = exist+limit+destName+" n'existe pas"+limit;
 						System.out.println(serverMessage);
 
 						break;
 					}
 
+					exist = 1;
+					
 					serverMessage = exist+limit+destName+limit+destUser.getPortEcoute()+limit+destUser.getAdresseIp()+limit;
 					System.out.println(serverMessage);
 
-					info.accuse_Reception("cou-cou"+limit, info.couple.get(destName), destUser);
+					info.accuse_Reception("cou-cou"+limit+userName+limit, info.couple.get(destName), destUser);
 					System.out.println("\n coucou à: "+destUser.getUserName());
 
 
@@ -157,10 +165,12 @@ public class UserThread extends Thread {
 
 				if(serverMessage != null)
 					info.accuse_Reception(clef+serverMessage, this, user);
-				
-				user.setOutput(writer);
+				else
+					continue;
 
 				rep = verbose.readSecure(reader.readLine(), key);
+				
+				user.setOutput(writer);
 				user.setInput(reader);
 
 
@@ -183,9 +193,9 @@ public class UserThread extends Thread {
 	 * 
 	 */
 
-	public void send(String message, User u) {
+	public synchronized void send(String message, User u) {
 
-		verbose.writeSecure(u.getPw(),message, key);
+		verbose.writeSecure(u.getPw(), message, key);
 	}
 
 	/*
@@ -194,7 +204,7 @@ public class UserThread extends Thread {
 	 * 
 	 */
 
-	public int add_User(String username, int portE) throws IOException {
+	public synchronized int add_User(String username, int portE) throws IOException {
 		System.out.println(username+": "+portE);
 
 		user = new User(username, InetAddress.getByName(null).getHostAddress(), socket.getPort(), portE, reader, writer);
@@ -214,7 +224,7 @@ public class UserThread extends Thread {
 	 * get client's announces.
 	 * 
 	 */
-	public void myAnnounces() {
+	public synchronized void myAnnounces() {
 		serverMessage = my_annonces.size()+limit;
 		int compteur = 0;
 		for(Annonce a: info.getAnnonce()) {
@@ -228,7 +238,7 @@ public class UserThread extends Thread {
 	 * get all announces.
 	 * 
 	 */
-	public void allAnnounces() {
+	public synchronized void allAnnounces() {
 		serverMessage = info.getAnnonce().size()+limit;
 
 		int compteur = 0;
@@ -243,7 +253,7 @@ public class UserThread extends Thread {
 	 * delete an announce.
 	 * 
 	 */
-	public boolean delete_Announce(String idAnnounce) {
+	public synchronized boolean delete_Announce(String idAnnounce) {
 
 		for(Annonce a: my_annonces) {
 			System.out.println(a.getId_Annonce());
@@ -254,7 +264,7 @@ public class UserThread extends Thread {
 				return true;
 			}
 		}
-		System.out.println("\n"+idAnnounce+" Doesnt existe or it's not yours!");
+		System.out.println("\n"+idAnnounce+" Doesn't existe or it's not yours!");
 		return false;
 	}
 

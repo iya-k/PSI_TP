@@ -1,25 +1,12 @@
 package petiteAnnonce.server;
 
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import petiteAnnonce.client.*;
 
-class Message{
-
-	protected String intitule;
-	protected String idMsg;
-	protected String _src;
-	protected String _dest;
-
-	public Message(String id, String corps, String src, String dest) {
-		idMsg = id;
-		intitule = corps;
-		_src = src;
-		_dest = dest;
-	}
-}
 
 public class Informations {
 
@@ -27,7 +14,6 @@ public class Informations {
 	private Set<UserThread> userThreads;
 	protected Set<Annonce> annnonces;
 	private int nAnnonce;
-	public Set<Message> msg;
 	public HashMap<String,UserThread> couple;
 
 	public synchronized Set<User> getUsers() {
@@ -63,6 +49,11 @@ public class Informations {
 
 		annnonces.remove(a);
 	}
+	
+	public synchronized void removeAllAnnonce(Set<Annonce> myAnnouces) {
+
+		annnonces.removeAll(myAnnouces);
+	}
 
 	/**
 	 * @return the nAnnonce
@@ -88,11 +79,11 @@ public class Informations {
 	/**
 	 * When a client is disconneted, removes the associated user and UserThread
 	 */
-	public synchronized void removeUser(User u, UserThread aUser) {
-		boolean removed = users.remove(u);
+	public synchronized void removeUser(User user, UserThread aUser) {
+		boolean removed = users.remove(user);
 		if (removed) {
 			userThreads.remove(aUser);
-			System.out.println("Bye bye " + u.getUserName());
+			System.out.println("Bye bye " + user.getUserName());
 		}
 	}
 
@@ -167,7 +158,6 @@ public class Informations {
 		userThreads = new HashSet<>();
 		annnonces = new HashSet<>();
 		nAnnonce = 0;
-		msg = new HashSet<>();
 		couple = new HashMap<>();
 	}
 
